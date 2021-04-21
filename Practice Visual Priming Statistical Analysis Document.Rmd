@@ -56,11 +56,26 @@ Starting with landing accuracy, we will show the frequency distribution of the p
 dtPlot = dt[Go.Around.==FALSE,.(Xtd, Treatment)]
 
 g <- ggplot(dtPlot)
-gg <- g+geom_histogram(aes(x = Xtd, fill = Treatment), bins = 10, alpha = 0.5)
+gg <- g+geom_histogram(aes(x = Xtd, fill = Treatment), bins = 20, alpha = 0.25, size = 2)
+gg <- gg+geom_vline(xintercept = mean(dtPlot[Treatment==FALSE,Xtd]), color = "red", size = 2, alpha=.25)
+gg <- gg+geom_vline(xintercept = mean(dtPlot[Treatment==TRUE,Xtd]), color = "lightblue", size = 2, alpha=.5)
 gg + labs(title = "Frequency of Landing Location (Xtd)", 
           subtitle = paste(" (N=", dtPlot[,.N]," Runs)",sep=""), 
           x = "Xtd", y = "Frequency", fill = "")
 
 ```
+
+```{r Go-Around_Dist}
+dtPlot = dt[,.(Xtd, Treatment, Go.Around.)]
+
+g <- ggplot(dtPlot)
+gg <- g+geom_bar(aes(x = Go.Around., fill = Treatment), stat= "count", position = "dodge",alpha = 0.25, size = 2)
+
+gg + labs(title = "Frequency of Go Around by Treatment", 
+          subtitle = paste(" (N=", dtPlot[,.N]," Runs)",sep=""), 
+          x = "Go Around", y = "Frequency", fill = "")
+
+```
+
 
 
