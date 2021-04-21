@@ -1,0 +1,66 @@
+---
+title: "Practice Visual Priming"
+author: "Dave Yachabach"
+date: "4/21/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(data.table)
+require(ggplot2)
+```
+
+## Practice Statistical Analysis for Visual Priming Experiment
+
+This document describes a statistical analysis of simulated data.  The data simulates the performance of airline crews flying approach scenarios in a Level D 737 flight simulator.  For a description of the experiment see *Rethinking Runway Safety from the Bottom Up*.  See the codebook for a description of variables and tables.  
+
+
+## Data Description  
+The operational data for this practice analysis is in a practice data file.  The available files are:  
+
+- *PD_4-21-2021.csv*.  
+
+The simulated Roster data is in a Roster file.  The available files are:  
+
+- *Roster_4-21-2021*  
+
+```{r LoadData, echo=FALSE}
+
+pthData <- "C:/Users/yacha/OneDrive/Education/Personal Interests/Aviation Research Interests/Visual Priming Experiment/Software/Practice Visual Priming Analysis/Data/"
+
+filData <- paste(pthData,"PD_4-21-2021.csv", sep = "")
+dt <- fread(filData, skip = 1, blank.lines.skip = TRUE, check.names = TRUE)
+
+filData <- paste(pthData,"Roster_4-21-2021.csv", sep = "")
+dtRoster <- fread(filData, skip = 1, blank.lines.skip = TRUE, check.names = TRUE)
+
+```
+
+### Independence of RunIDs  
+The following graphs indicate that RunIDs were evenly distributed throughout a simulator session.  In other words, RL-NI was just as likely to occur on the 6th run as on the 15th run.
+
+
+
+```{r RunID_Independence, echo=FALSE}
+
+
+
+```
+
+### Landing Accuracy  
+Starting with landing accuracy, we will show the frequency distribution of the population, the treatment sample, and the control sample.  
+
+```{r Xtd_Distribution}
+
+dtPlot = dt[Go.Around.==FALSE,.(Xtd, Treatment)]
+
+g <- ggplot(dtPlot)
+gg <- g+geom_histogram(aes(x = Xtd, fill = Treatment), bins = 10, alpha = 0.5)
+gg + labs(title = "Frequency of Landing Location (Xtd)", 
+          subtitle = paste(" (N=", dtPlot[,.N]," Runs)",sep=""), 
+          x = "Xtd", y = "Frequency", fill = "")
+
+```
+
+
