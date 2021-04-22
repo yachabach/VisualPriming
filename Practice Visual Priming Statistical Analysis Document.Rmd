@@ -19,7 +19,7 @@ This document describes a statistical analysis of simulated data.  The data simu
 ## Data Description  
 The operational data for this practice analysis is in a practice data file.  The available files are:  
 
-- *PD_4-21-2021.csv*.  
+- *PD_4-22-2021.csv*.  
 
 The simulated Roster data is in a Roster file.  The available files are:  
 
@@ -29,7 +29,7 @@ The simulated Roster data is in a Roster file.  The available files are:
 
 pthData <- "C:/Users/yacha/OneDrive/Education/Personal Interests/Aviation Research Interests/Visual Priming Experiment/Software/Practice Visual Priming Analysis/Data/"
 
-filData <- paste(pthData,"PD_4-21-2021.csv", sep = "")
+filData <- paste(pthData,"PD_4-22-2021.csv", sep = "")
 dt <- fread(filData, skip = 1, blank.lines.skip = TRUE, check.names = TRUE)
 
 filData <- paste(pthData,"Roster_4-21-2021.csv", sep = "")
@@ -44,28 +44,57 @@ The following graphs indicate that RunIDs were evenly distributed throughout a s
 
 ```{r RunID_Independence, echo=FALSE}
 
+dtPlot = dt[,.(Run.ID,Run)]
 
+g <- ggplot(dtPlot)
+gg <- g+geom_density(aes(x = Run, fill=Run.ID , color=Run.ID ),alpha = 0.10)
+
+gg + labs(title = "Frequency of RunIDs in Run Sequence", 
+          subtitle = paste(" (N=", dtPlot[,.N]," Runs)",sep=""), 
+          x = "Run Number", y = "Density", fill = "")
 
 ```
 
 ### Landing Accuracy  
-Starting with landing accuracy, we will show the frequency distribution of the population, the treatment sample, and the control sample.  
+Starting with landing accuracy, we will show the frequency distribution of the population separted by treatment and  control.  
 
-```{r Xtd_Distribution}
+```{r Xtd_Frequency_Distribution, echo=FALSE}
 
 dtPlot = dt[Go.Around.==FALSE,.(Xtd, Treatment)]
 
 g <- ggplot(dtPlot)
-gg <- g+geom_histogram(aes(x = Xtd, fill = Treatment), bins = 20, alpha = 0.25, size = 2)
-gg <- gg+geom_vline(xintercept = mean(dtPlot[Treatment==FALSE,Xtd]), color = "red", size = 2, alpha=.25)
-gg <- gg+geom_vline(xintercept = mean(dtPlot[Treatment==TRUE,Xtd]), color = "lightblue", size = 2, alpha=.5)
+gg <- g+geom_histogram(aes(x = Xtd, fill = Treatment), bins=20,alpha = 0.25, position = "dodge")
+gg <- gg+geom_freqpoly(aes(x = Xtd, color = Treatment), bins=20,alpha = 0.25, position = "dodge", size = 2, show.legend = FALSE)
+gg <- gg+geom_vline(xintercept = mean(dtPlot[Treatment=="Control",Xtd]), color = "red", size = 2, alpha=.25)
+gg <- gg+geom_vline(xintercept = mean(dtPlot[Treatment=="Treatment",Xtd]), color = "lightblue", size = 2, alpha=.5)
 gg + labs(title = "Frequency of Landing Location (Xtd)", 
           subtitle = paste(" (N=", dtPlot[,.N]," Runs)",sep=""), 
           x = "Xtd", y = "Frequency", fill = "")
 
+
 ```
 
-```{r Go-Around_Dist}
+It's a little easier to see the decrease in variance between treatment and control with a density distribution.
+
+
+```{r Xtd_Density_Distribution, echo=FALSE}
+
+dtPlot = dt[Go.Around.==FALSE,.(Xtd, Treatment)]
+
+g <- ggplot(dtPlot)
+gg <- g+geom_density(aes(x = Xtd, y = ..density..,fill = Treatment), stat = "density",alpha = 0.25, position="jitter")
+gg <- gg+geom_vline(xintercept = mean(dtPlot[Treatment=="Control",Xtd]), color = "red", size = 2, alpha=.25)
+gg <- gg+geom_vline(xintercept = mean(dtPlot[Treatment=="Treatment",Xtd]), color = "lightblue", size = 2, alpha=.5)
+gg + labs(title = "Density Distribution of Landing Location (Xtd)", 
+          subtitle = paste(" (N=", dtPlot[,.N]," Runs)",sep=""), 
+          x = "Xtd", y = "Density", fill = "")
+
+```
+
+### Go Around Liklihood  
+The following graph shows the difference in the go-around rate between treatment and control.  The difference is small.  The treatment group went around `r dt[Treatment == "Treatment" & Go.Around.==TRUE,.N]`, while the control went around `r dt[Treatment == "Control" & Go.Around.==TRUE,.N]`. 
+
+```{r Go-Around_Dist, echo=FALSE}
 dtPlot = dt[,.(Xtd, Treatment, Go.Around.)]
 
 g <- ggplot(dtPlot)
