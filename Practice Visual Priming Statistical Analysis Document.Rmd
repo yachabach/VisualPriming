@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 require(data.table)
 require(ggplot2)
+require(DescTools)
 ```
 
 ## Practice Statistical Analysis for Visual Priming Experiment
@@ -42,13 +43,13 @@ The following graphs indicate that RunIDs were evenly distributed throughout a s
 
 
 
-```{r RunID_Independence, echo=FALSE}
+```{r RunID_Independence, echo=FALSE, out.width="50%"}
 
 dtPlot = dt[,.(Run.ID,Run)]
 
 g <- ggplot(dtPlot)
 gg <- g+geom_density(aes(x = Run, fill=Run.ID , color=Run.ID ),alpha = 0.10)
-
+gg <- gg+guides(color=FALSE)
 gg + labs(title = "Frequency of RunIDs in Run Sequence", 
           subtitle = paste(" (N=", dtPlot[,.N]," Runs)",sep=""), 
           x = "Run Number", y = "Density", fill = "")
@@ -56,9 +57,9 @@ gg + labs(title = "Frequency of RunIDs in Run Sequence",
 ```
 
 ### Landing Accuracy  
-Starting with landing accuracy, we will show the frequency distribution of the population separted by treatment and  control.  
+Starting with landing accuracy, we will show the frequency distribution of the population separted by treatment and  control. It's a little easier to see the decrease in variance between treatment and control with a density distribution.  
 
-```{r Xtd_Frequency_Distribution, echo=FALSE}
+```{r Xtd_Frequency_Distribution, echo=FALSE, fig.show='hold',out.width="50%"}
 
 dtPlot = dt[Go.Around.==FALSE,.(Xtd, Treatment)]
 
@@ -72,13 +73,6 @@ gg + labs(title = "Frequency of Landing Location (Xtd)",
           x = "Xtd", y = "Frequency", fill = "")
 
 
-```
-
-It's a little easier to see the decrease in variance between treatment and control with a density distribution.
-
-
-```{r Xtd_Density_Distribution, echo=FALSE}
-
 dtPlot = dt[Go.Around.==FALSE,.(Xtd, Treatment)]
 
 g <- ggplot(dtPlot)
@@ -91,10 +85,10 @@ gg + labs(title = "Density Distribution of Landing Location (Xtd)",
 
 ```
 
-### Go Around Liklihood  
+### Go Around Likelihood  
 The following graph shows the difference in the go-around rate between treatment and control.  The difference is small.  The treatment group went around `r dt[Treatment == "Treatment" & Go.Around.==TRUE,.N]`, while the control went around `r dt[Treatment == "Control" & Go.Around.==TRUE,.N]`. 
 
-```{r Go-Around_Dist, echo=FALSE}
+```{r Go-Around_Dist, echo=FALSE, out.width='50%'}
 dtPlot = dt[,.(Xtd, Treatment, Go.Around.)]
 
 g <- ggplot(dtPlot)
@@ -103,6 +97,30 @@ gg <- g+geom_bar(aes(x = Go.Around., fill = Treatment), stat= "count", position 
 gg + labs(title = "Frequency of Go Around by Treatment", 
           subtitle = paste(" (N=", dtPlot[,.N]," Runs)",sep=""), 
           x = "Go Around", y = "Frequency", fill = "")
+
+```
+
+
+## Descriptive Statistics  
+
+As was created in the simulation, the mean touchdown point between treatment and control was not significantly different.  However, the standard deviation between the two is:  
+
+```{r Descriptives}
+
+dt[Go.Around.==FALSE,.(Mean = mean(Xtd),SD = sd(Xtd)),by="Treatment"]
+
+
+```
+
+We tried for a similar effect using runway length.  Here is how that worked out:  
+
+
+```{r Descriptives}
+
+dtRunway <- dt[Go.Around.==FALSE,.(Run.ID,Xtd)]
+dtRunway$RwyLen <- StrLeft(dtRunway$Run.ID,2)
+
+dtRunway[,.(Mean = round(mean(Xtd),0),SD = round(sd(Xtd),0)),by="RwyLen"]
 
 ```
 
